@@ -39,6 +39,23 @@ class TyphoonApp:
         char = name if len(name) == 1 else None
         self.buffer.feed_key(name, char)
 
+    # Modifier keys that may be held down when the hotkey fires; we force them
+    # up before sending synthetic input so they don't get stuck or alter it.
+    _MODIFIERS = (
+        "ctrl", "left ctrl", "right ctrl",
+        "alt", "left alt", "right alt", "alt gr",
+        "shift", "left shift", "right shift",
+        "left windows", "right windows",
+    )
+
+    def _release_modifiers(self) -> None:
+        for mod in self._MODIFIERS:
+            try:
+                keyboard.release(mod)
+            except (ValueError, KeyError):
+                # Not every name exists on every layout/keyboard — ignore.
+                pass
+
     def _replace_last_segment(self) -> None:
         """Rewrite the buffered text into the other layout, in place."""
         if not self.enabled:
@@ -57,11 +74,18 @@ class TyphoonApp:
             delay = float(self.cfg["send_delay"])
             self._suppress = True
             try:
+                # The hotkey is still physically held (e.g. Ctrl+Alt), so let
+                # go of the modifiers first — otherwise our backspaces become
+                # Ctrl+Backspace and typed chars get modified.
+                self._release_modifiers()
+                time.sleep(0.01)
                 # Delete what's there, then type the corrected text.
                 for _ in range(len(original)):
                     keyboard.send("backspace")
                     time.sleep(delay)
-                keyboard.write(fixed, delay=delay)
+                # restore_state_after=False is critical: the default re-presses
+                # the modifiers we just released, which leaves Ctrl "stuck".
+                keyboard.write(fixed, delay=delay, restore_state_after=False)
             finally:
                 # Let the OS drain our synthetic events before re-listening.
                 time.sleep(0.02)
