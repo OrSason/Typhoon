@@ -42,7 +42,18 @@ A cyan **T** icon appears in the tray. Type some gibberish, then press the hotke
 
 ### Default hotkey
 
-`Ctrl + Alt + Space` — rewrite the last typed segment.
+`Ctrl + Alt + Win` — rewrite the last typed segment.
+
+### Changing the hotkey
+
+Right-click the tray icon → **Change hotkey (…)**, then press the new combo. It's
+saved to `config.json` and rebound immediately — no restart. (You can also edit
+the `hotkey` value in `config.json` directly.)
+
+> The default is modifier-only (Ctrl+Alt+Win), which Typhoon deliberately does
+> **not** suppress — suppressing bare modifiers would break them system-wide.
+> Combos that include a normal key (e.g. `ctrl+alt+space`) *are* suppressed so
+> the key isn't typed into your document.
 
 ## Build a standalone .exe
 
@@ -68,7 +79,7 @@ local preference). Defaults:
 
 ```json
 {
-  "hotkey": "ctrl+alt+space",
+  "hotkey": "ctrl+alt+windows",
   "enabled": true,
   "send_delay": 0.005,
   "switch_language": true

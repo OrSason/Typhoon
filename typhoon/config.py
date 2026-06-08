@@ -6,8 +6,9 @@ import json
 from pathlib import Path
 
 DEFAULTS: dict = {
-    # Global hotkey that rewrites the last typed segment.
-    "hotkey": "ctrl+alt+space",
+    # Global hotkey that rewrites the last typed segment. Change it from the
+    # tray menu (Hotkey: …) or by editing this value.
+    "hotkey": "ctrl+alt+windows",
     # Start with conversion active.
     "enabled": True,
     # Small pause (seconds) between sending backspaces/characters so target

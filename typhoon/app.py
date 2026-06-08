@@ -28,6 +28,7 @@ class TyphoonApp:
         self._replacing = threading.Lock()
         self._suppress = False
         self.icon: pystray.Icon | None = None
+        self._hotkey_handle = None
 
     # ----- keyboard handling -------------------------------------------------
 
@@ -156,20 +157,71 @@ class TyphoonApp:
                 self._toggle_autostart,
                 checked=lambda _item: autostart.is_enabled(),
             ),
-            pystray.MenuItem(f"Hotkey: {self.cfg['hotkey']}", None, enabled=False),
+            pystray.MenuItem(
+                lambda _item: f"Change hotkey  ({self.cfg['hotkey']})",
+                self._change_hotkey,
+            ),
             pystray.Menu.SEPARATOR,
             pystray.MenuItem("Quit", self._quit),
         )
+
+    # ----- hotkey (re)binding ------------------------------------------------
+
+    # Names that are *only* modifiers — a hotkey made of just these has no
+    # printable key, so we must NOT suppress it (that would swallow Ctrl/Alt/Win
+    # system-wide). Hotkeys with a real key (e.g. +Space) are suppressed so the
+    # key isn't inserted into the focused app.
+    _MOD_NAMES = frozenset(
+        {
+            "ctrl", "control", "alt", "alt gr", "altgr", "shift",
+            "win", "windows", "cmd", "command",
+            "left ctrl", "right ctrl", "left alt", "right alt",
+            "left shift", "right shift", "left windows", "right windows",
+        }
+    )
+
+    def _should_suppress(self, hotkey: str) -> bool:
+        keys = [k.strip().lower() for k in hotkey.split("+") if k.strip()]
+        return any(k not in self._MOD_NAMES for k in keys)
+
+    def _register_hotkey(self) -> None:
+        """(Re)bind the global hotkey from ``self.cfg['hotkey']``."""
+        if self._hotkey_handle is not None:
+            try:
+                keyboard.remove_hotkey(self._hotkey_handle)
+            except (KeyError, ValueError):
+                pass
+            self._hotkey_handle = None
+        hotkey = self.cfg["hotkey"]
+        self._hotkey_handle = keyboard.add_hotkey(
+            hotkey, self._replace_last_segment, suppress=self._should_suppress(hotkey)
+        )
+
+    def _change_hotkey(self, *_args) -> None:
+        # read_hotkey() blocks, so capture on a worker thread.
+        threading.Thread(target=self._capture_hotkey, daemon=True).start()
+
+    def _capture_hotkey(self) -> None:
+        if self.icon is not None:
+            self.icon.notify("Press the new shortcut now…", "Typhoon")
+        try:
+            new_hotkey = keyboard.read_hotkey(suppress=False)
+        except Exception:
+            return
+        if not new_hotkey or new_hotkey.lower() in ("esc", "escape"):
+            return
+        self.cfg["hotkey"] = new_hotkey
+        config.save(self.cfg)
+        self._register_hotkey()
+        if self.icon is not None:
+            self.icon.notify(f"Hotkey set to: {new_hotkey}", "Typhoon")
+            self.icon.update_menu()
 
     # ----- lifecycle ---------------------------------------------------------
 
     def run(self) -> None:
         keyboard.hook(self._on_key)
-        # suppress=True so the hotkey combo (incl. its Space) never reaches the
-        # focused app — otherwise a stray Space gets inserted next to the text.
-        keyboard.add_hotkey(
-            self.cfg["hotkey"], self._replace_last_segment, suppress=True
-        )
+        self._register_hotkey()
         self.icon = pystray.Icon(
             "typhoon", self._make_image(), "Typhoon", self._menu()
         )
