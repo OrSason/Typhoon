@@ -79,7 +79,17 @@ local preference). Defaults:
 - **send_delay** — pause between synthetic keystrokes. Increase it (e.g. `0.02`)
   if replacements come out garbled in a slow app.
 
-You can also toggle Typhoon on/off or quit from the tray icon's right-click menu.
+You can also toggle Typhoon on/off, **Start with Windows**, or quit from the tray
+icon's right-click menu.
+
+## Start with Windows
+
+Right-click the tray icon → **Start with Windows** to launch Typhoon
+automatically at login. This writes a per-user entry under
+`HKCU\Software\Microsoft\Windows\CurrentVersion\Run` (no admin needed) pointing
+at the current exe (or `pythonw main.py` when running from source). Toggle it off
+the same way. The path is refreshed every time you enable it, so it survives
+moving the project or rebuilding the exe.
 
 ## Tests
 

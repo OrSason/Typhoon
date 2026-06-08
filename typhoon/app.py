@@ -14,7 +14,7 @@ import keyboard
 import pystray
 from PIL import Image
 
-from . import config, icon, layout
+from . import autostart, config, icon, layout
 from .tracker import TypedBuffer
 
 
@@ -89,6 +89,11 @@ class TyphoonApp:
         if self.icon is not None:
             self.icon.update_menu()
 
+    def _toggle_autostart(self, *_args) -> None:
+        autostart.toggle()
+        if self.icon is not None:
+            self.icon.update_menu()
+
     def _quit(self, *_args) -> None:
         keyboard.unhook_all()
         if self.icon is not None:
@@ -100,6 +105,11 @@ class TyphoonApp:
                 "Enabled",
                 self._toggle,
                 checked=lambda _item: self.enabled,
+            ),
+            pystray.MenuItem(
+                "Start with Windows",
+                self._toggle_autostart,
+                checked=lambda _item: autostart.is_enabled(),
             ),
             pystray.MenuItem(f"Hotkey: {self.cfg['hotkey']}", None, enabled=False),
             pystray.Menu.SEPARATOR,

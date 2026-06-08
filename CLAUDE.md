@@ -17,6 +17,8 @@ Windows-only background tray app that fixes wrong-keyboard-layout text
   `convert()`. **Pure, unit-tested.** Add new layouts/keys here.
 - `typhoon/tracker.py` — `TypedBuffer`, the pure keystroke buffer + reset rules.
 - `typhoon/config.py` — reads/writes `config.json` (git-ignored, user-local).
+- `typhoon/autostart.py` — run-at-login toggle via the `HKCU\...\Run` registry
+  key (per-user, no admin). Path is rewritten on each enable.
 - `typhoon/icon.py` — `make_image()`, the tray/exe icon drawing (shared by the
   app and `build.py`).
 - `typhoon/app.py` — the only module that touches `keyboard`/`pystray`. Keyboard
