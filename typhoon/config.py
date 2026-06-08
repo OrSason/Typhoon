@@ -13,6 +13,9 @@ DEFAULTS: dict = {
     # Small pause (seconds) between sending backspaces/characters so target
     # apps keep up. Raise it if replacements come out garbled in slow apps.
     "send_delay": 0.005,
+    # After fixing text, switch the focused window's input language to match
+    # (Hebrew gibberish -> English, and vice-versa). Set false to leave it.
+    "switch_language": True,
 }
 
 CONFIG_PATH = Path(__file__).resolve().parent.parent / "config.json"

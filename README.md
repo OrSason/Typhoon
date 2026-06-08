@@ -70,7 +70,8 @@ local preference). Defaults:
 {
   "hotkey": "ctrl+alt+space",
   "enabled": true,
-  "send_delay": 0.005
+  "send_delay": 0.005,
+  "switch_language": true
 }
 ```
 
@@ -78,6 +79,10 @@ local preference). Defaults:
   library understands, e.g. `"ctrl+alt+q"` or `"pause"`.
 - **send_delay** — pause between synthetic keystrokes. Increase it (e.g. `0.02`)
   if replacements come out garbled in a slow app.
+- **switch_language** — after fixing text, also switch the focused window's
+  input language to match (Hebrew gibberish → English keyboard, and vice-versa)
+  so your *next* keystrokes are already in the right layout. Set `false` to
+  leave the input language untouched.
 
 You can also toggle Typhoon on/off, **Start with Windows**, or quit from the tray
 icon's right-click menu.

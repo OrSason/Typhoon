@@ -14,7 +14,7 @@ import keyboard
 import pystray
 from PIL import Image
 
-from . import autostart, config, icon, layout
+from . import autostart, config, icon, layout, winlang
 from .tracker import TypedBuffer
 
 
@@ -34,10 +34,25 @@ class TyphoonApp:
     def _on_key(self, event: keyboard.KeyboardEvent) -> None:
         if self._suppress or event.event_type != "down":
             return
+        # Ignore keys pressed while Ctrl/Alt/Win are held: that's a shortcut
+        # (e.g. our own hotkey), not text. Without this the hotkey's Space
+        # leaks into the buffer and corrupts the first replacement.
+        if self._modifier_held():
+            return
         # ``event.name`` is the logical key; for printable keys it's the char.
         name = event.name or ""
         char = name if len(name) == 1 else None
         self.buffer.feed_key(name, char)
+
+    @staticmethod
+    def _modifier_held() -> bool:
+        for mod in ("ctrl", "alt", "left windows", "right windows"):
+            try:
+                if keyboard.is_pressed(mod):
+                    return True
+            except (ValueError, KeyError):
+                pass
+        return False
 
     # Modifier keys that may be held down when the hotkey fires; we force them
     # up before sending synthetic input so they don't get stuck or alter it.
@@ -67,7 +82,8 @@ class TyphoonApp:
             original = self.buffer.text
             if not original.strip():
                 return
-            fixed = layout.convert(original)
+            direction = layout.detect_direction(original)
+            fixed = layout.convert(original, direction)
             if fixed == original:
                 return
 
@@ -92,6 +108,11 @@ class TyphoonApp:
                 self._suppress = False
 
             self.buffer.set(fixed)
+
+            # The layout was wrong, so switch the focused window to the target
+            # language too — that way your *next* keystrokes come out right.
+            if self.cfg.get("switch_language", True):
+                winlang.switch("en" if direction == "he2en" else "he")
         finally:
             self._replacing.release()
 
@@ -144,8 +165,10 @@ class TyphoonApp:
 
     def run(self) -> None:
         keyboard.hook(self._on_key)
+        # suppress=True so the hotkey combo (incl. its Space) never reaches the
+        # focused app — otherwise a stray Space gets inserted next to the text.
         keyboard.add_hotkey(
-            self.cfg["hotkey"], self._replace_last_segment, suppress=False
+            self.cfg["hotkey"], self._replace_last_segment, suppress=True
         )
         self.icon = pystray.Icon(
             "typhoon", self._make_image(), "Typhoon", self._menu()
