@@ -9,6 +9,10 @@ dist/
 *.egg-info/
 .eggs/
 
+# PyInstaller build artifacts
+*.spec
+assets/typhoon.ico
+
 # Virtual environments
 .venv/
 venv/

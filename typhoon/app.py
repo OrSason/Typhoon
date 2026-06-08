@@ -12,9 +12,9 @@ import time
 
 import keyboard
 import pystray
-from PIL import Image, ImageDraw
+from PIL import Image
 
-from . import config, layout
+from . import config, icon, layout
 from .tracker import TypedBuffer
 
 
@@ -74,17 +74,7 @@ class TyphoonApp:
     # ----- tray icon ---------------------------------------------------------
 
     def _make_image(self) -> Image.Image:
-        """A simple stylized 'T' tray icon (cyan on dark, dimmed when off)."""
-        size = 64
-        img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-        d = ImageDraw.Draw(img)
-        bg = (24, 28, 36, 255)
-        fg = (0, 200, 220, 255) if self.enabled else (110, 110, 110, 255)
-        d.rounded_rectangle([4, 4, size - 4, size - 4], radius=12, fill=bg)
-        # Draw a chunky 'T'.
-        d.rectangle([16, 18, 48, 26], fill=fg)
-        d.rectangle([28, 18, 36, 48], fill=fg)
-        return img
+        return icon.make_image(self.enabled)
 
     def _refresh_icon(self) -> None:
         if self.icon is not None:

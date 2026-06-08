@@ -44,6 +44,23 @@ A cyan **T** icon appears in the tray. Type some gibberish, then press the hotke
 
 `Ctrl + Alt + Space` — rewrite the last typed segment.
 
+## Build a standalone .exe
+
+No Python needed on the target machine — produce a single self-contained exe:
+
+```powershell
+pip install -r requirements-build.txt
+python build.py
+```
+
+Output: **`dist\Typhoon.exe`** (~16 MB, one file, no console window). Double-click
+it to run; it appears in the tray just like `python main.py`. The build also
+generates `assets\typhoon.ico` for the exe icon.
+
+> If the hotkey needs admin rights (see note above), right-click `Typhoon.exe`
+> → **Run as administrator**, or set that permanently via the exe's
+> Properties → Compatibility tab.
+
 ## Configuration
 
 A `config.json` is created/read at the project root (it's git-ignored — it's your

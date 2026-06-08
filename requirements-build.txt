@@ -1,0 +1,4 @@
+# Build-only dependencies (for `python build.py`).
+# Install on top of requirements.txt: pip install -r requirements-build.txt
+-r requirements.txt
+pyinstaller>=6.0.0
