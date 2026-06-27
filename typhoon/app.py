@@ -14,7 +14,7 @@ import keyboard
 import pystray
 from PIL import Image
 
-from . import autostart, config, icon, layout, winlang
+from . import __version__, autostart, config, icon, layout, winlang
 from .tracker import TypedBuffer
 
 
@@ -125,7 +125,9 @@ class TyphoonApp:
     def _refresh_icon(self) -> None:
         if self.icon is not None:
             self.icon.icon = self._make_image()
-            self.icon.title = f"Typhoon — {'on' if self.enabled else 'off'}"
+            self.icon.title = (
+                f"Typhoon v{__version__} — {'on' if self.enabled else 'off'}"
+            )
 
     def _toggle(self, *_args) -> None:
         self.enabled = not self.enabled
@@ -147,6 +149,8 @@ class TyphoonApp:
 
     def _menu(self) -> pystray.Menu:
         return pystray.Menu(
+            pystray.MenuItem(f"Typhoon v{__version__}", None, enabled=False),
+            pystray.Menu.SEPARATOR,
             pystray.MenuItem(
                 "Enabled",
                 self._toggle,
@@ -223,7 +227,10 @@ class TyphoonApp:
         keyboard.hook(self._on_key)
         self._register_hotkey()
         self.icon = pystray.Icon(
-            "typhoon", self._make_image(), "Typhoon", self._menu()
+            "typhoon",
+            self._make_image(),
+            f"Typhoon v{__version__} — {'on' if self.enabled else 'off'}",
+            self._menu(),
         )
         self.icon.run()
 

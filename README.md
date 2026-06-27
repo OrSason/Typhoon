@@ -128,7 +128,20 @@ typhoon/
   app.py             # keyboard hooks, global hotkey, tray icon
 tests/
   test_layout.py
+  test_version.py
 ```
+
+## Version
+
+Check the installed version without launching the tray app:
+
+```powershell
+python main.py --version    # e.g. "Typhoon 0.2.0"
+```
+
+The same version shows in the tray-icon tooltip and at the top of its
+right-click menu. Versioning follows [SemVer](https://semver.org/) — see
+[`docs/VERSIONING.md`](docs/VERSIONING.md) and [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Caveats
 
